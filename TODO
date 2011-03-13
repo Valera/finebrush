@@ -1,0 +1,22 @@
+Finebrush todo.
+
+Needed features with priorities.
+
+10 GTK "Scribble" in CL.
+10 Simple Brush (Round, Round Aliased, Round Soft)
+10 Save/Load
+9 Unified brush engine
+9 New Painting Dialog
+9 Color Picker (try gtk standar and others).
+7 Undo/Redo
+6 Layer engine
+6 Hairy Brush
+6 Composition tools & perspective grids.
+6 Blur / Smudge / Dodge / Burn
+5 Brush applying modes (normal, hard/solt ligth, overlay etc)
+4 Color Mixer
+2 Fractal paper generator
+2 Brush tip display
+2 Brush compositing tools
+1 GPU speedup
+
