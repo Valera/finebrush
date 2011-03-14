@@ -1,16 +1,10 @@
 (in-package :finebrush)
 
-(defun widget-size (widget)
-  (multiple-value-bind (w h) (gdk:drawable-get-size (widget-window widget))
-    (list w h)))				    
-
 (defun scribble ()
   (let (pixmap)
     (labels ((realize (widget)
-	       (iter (for i in '(:pointer-motion-mask
-				 :pointer-motion-hint-mask
-				 :leave-notify-mask
-				 :button-press-mask))
+	       (iter (for i in '(:pointer-motion-mask :pointer-motion-hint-mask
+				 :leave-notify-mask :button-press-mask))
 		     (pushnew i (gdk-window-events (widget-window widget)))))
 	     (configure-event (widget event)
 	       (declare (ignore event))
@@ -67,39 +61,30 @@
 		  (drawing-area
 		   :var da
 		   :default-width 200
-		   :default-height 200) :expand t
+		   :default-height 200)
 		  (button
 		   :label "quit"
 		   :var button)
 		  :expand nil))
-	  (connect-signal da "configure-event"
-			  #'configure-event)
-	  (connect-signal da "expose-event"
-			  #'expose-event)
-	  (connect-signal button "clicked"
-			  #'(lambda (args)
-			      (declare (ignore args))
-			      (object-destroy w)))
-	  (connect-signal w "destroy"
-			  #'(lambda (w)
-			      (declare (ignore w))
-			      (leave-gtk-main)))
-	  (connect-signal da "button_press_event"
-			  #'button-press-event)
-	  (connect-signal da "motion_notify_event"
-			  #'motion-notify-event)
-	  (connect-signal da "realize"
-			  #'realize)
+	  (connect-signal da "configure-event" #'configure-event)
+	  (connect-signal da "expose-event" #'expose-event)
+	  (connect-signal button "clicked" #'(lambda (args)
+					       (declare (ignore args))
+					       (object-destroy w)))
+	  (connect-signal w "destroy" #'(lambda (w)
+					  (declare (ignore w))
+					  (leave-gtk-main)))
+	  (connect-signal da "button_press_event" #'button-press-event)
+	  (connect-signal da "motion_notify_event" #'motion-notify-event)
+	  (connect-signal da "realize" #'realize)
 	  (widget-show da)
 	  (widget-show w))))))
 
 (defun scribble-xinput ()
   (let (pixmap input-d)
     (labels ((realize (widget)
-	       (iter (for i in '(:pointer-motion-mask
-				 :pointer-motion-hint-mask
-				 :leave-notify-mask
-				 :button-press-mask))
+	       (iter (for i in '(:pointer-motion-mask :pointer-motion-hint-mask
+				 :leave-notify-mask :button-press-mask))
 		     (pushnew i (gdk-window-events (widget-window widget)))))
 	     (configure-event (widget event)
 	       (declare (ignore event))
@@ -121,24 +106,16 @@
 				(rectangle-width rect) (rectangle-height rect)))
 	       nil)
 	     (draw-brush (widget source x y pressure)
-	       (print (list x y pressure) *debug*)
 	       (flet ((greyscale-color (x)
-			(print (list 'a x) *debug*)
 			(make-color :red x :green x :blue x)))
-		 (print source *debug*)
-		 (let* (#+nil(gc (make-instance 'graphics-context
-					  :rgb-fg-color (greyscale-color
-							 (ecase source
-							   (:mouse 15000)
-							   (:pen 0)
-							   (:eraser 65535)
-							   (:cursor 45000)))))
-			     (gc (graphics-context-new pixmap))
-		       (pressure (clamp (or pressure 1) 0 1))
-		       (x (round (- x (* 10 pressure))))
-		       (y (round (- y (* 10 pressure))))
-		       (w (round (* 20 pressure)))
-		       (h (round (* 20 pressure))))
+		 (let* ((gc (graphics-context-new pixmap))
+			(pressure (if (eq :mouse source)
+				      (clamp (or pressure 1) 0 1)
+				      (clamp (or pressure 0) 0 1)))
+			(x (round (- x (* 10 pressure))))
+			(y (round (- y (* 10 pressure))))
+			(w (round (* 20 pressure)))
+			(h (round (* 20 pressure))))
 		   (setf (graphics-context-rgb-fg-color gc)
 			 (greyscale-color
 			  (ecase source
@@ -152,15 +129,12 @@
 	     (button-press-event (widget event)
 	       (when (and pixmap
 			  (= (event-button-button event) 1))
-		 (print (event-button-device event) *debug*)
 		 (draw-brush widget (gdk-device-source (event-button-device event))
 			     (event-button-x event) (event-button-y event)
 			     (event-get-axis event :pressure))))
 	     (motion-notify-event (widget event)
-	       (print (event-motion-device event) *debug*)
 	       (let ((device (event-motion-device event))
 		     x y pressure state)
-		 (print (event-motion-is-hint event) *debug*)
 		 (if (= (event-motion-is-hint event) 1)
 		     (setf x (event-get-axis event :x)
 			   y (event-get-axis event :y)
@@ -169,13 +143,9 @@
 		     (multiple-value-bind (retval x1 y1 state1)
 			 (gdk-window-get-pointer (widget-window widget))
 		       (declare (ignore retval))
-		       (setf x (event-get-axis event :x) y y1 
+		       (setf x x1 y y1 
 			     pressure (event-get-axis event :pressure)
 			     state state1)))
-		 (iter (for i in '(:x :y :pressure :xtilt :ytilt))
-		       (print (list i (event-get-axis event i)) *debug*))
-			    
-;		 (print (list 'x x 'pressure pressure) *debug*)
 		 (if (and pixmap
 			  (member :button1-mask state))
 		     (draw-brush widget (gdk-device-source device)
@@ -183,16 +153,11 @@
 	     (create-input-dialog ()
 	       (unless input-d
 		 (setf input-d (make-instance 'input-dialog))
-;		 (connect-signal input-d "destroy"
-;				 #'(lambda (&rest args) (declare (ignore args))))
-;		 (connect-signal (dialog
 		 (connect-signal input-d "destroy"
 				 #'(lambda (object)
 				     (setf input-d nil)
 				     (object-destroy object)))
-
-		 (widget-show input-d)))
-)
+		 (widget-show input-d))))
       (within-main-loop
 	(let-ui (gtk-window
 		 :var w
@@ -214,28 +179,20 @@
 		   :label "quit"
 		   :var button)
 		  :expand nil))
-	  (connect-signal da "configure-event"
-			  #'configure-event)
-	  (connect-signal da "expose-event"
-			  #'expose-event)
-	  (connect-signal input-dialog-button "clicked"
-			  #'(lambda (args)
-			      (declare (ignore args))
-			      (create-input-dialog)))
-	  (connect-signal button "clicked"
-			  #'(lambda (args)
-			      (declare (ignore args))
-			      (object-destroy w)))
-	  (connect-signal w "destroy"
-			  #'(lambda (w)
-			      (declare (ignore w))
-			      (leave-gtk-main)))
-	  (connect-signal da "button_press_event"
-			  #'button-press-event)
-	  (connect-signal da "motion_notify_event"
-			  #'motion-notify-event)
-	  (connect-signal da "realize"
-			  #'realize)
+	  (connect-signal da "configure-event" #'configure-event)
+	  (connect-signal da "expose-event" #'expose-event)
+	  (connect-signal input-dialog-button "clicked" #'(lambda (args)
+							    (declare (ignore args))
+							    (create-input-dialog)))
+	  (connect-signal button "clicked" #'(lambda (args)
+					       (declare (ignore args))
+					       (object-destroy w)))
+	  (connect-signal w "destroy" #'(lambda (w)
+					  (declare (ignore w))
+					  (leave-gtk-main)))
+	  (connect-signal da "button_press_event" #'button-press-event)
+	  (connect-signal da "motion_notify_event" #'motion-notify-event)
+	  (connect-signal da "realize" #'realize)
 	  (setf (widget-extension-events da) :cursor)
 	  (widget-show da)
 	  (widget-show w))))))

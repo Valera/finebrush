@@ -5,6 +5,10 @@
 ;;; FIXME: recactor it :(
 ;;; FIXME: separate class for Curwe Widget.
 
+(defun widget-size (widget)
+  (multiple-value-bind (w h) (gdk:drawable-get-size (widget-window widget))
+    (list w h)))
+
 (defparameter *debug* *standard-output*)
 
 (defun grid-from-vector (vector)
