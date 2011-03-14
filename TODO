@@ -2,7 +2,7 @@ Finebrush todo.
 
 Needed features with priorities.
 
-10 GTK "Scribble" in CL.
++ 10 GTK "Scribble" in CL.
 10 Simple Brush (Round, Round Aliased, Round Soft)
 10 Save/Load
 9 Unified brush engine
@@ -18,5 +18,6 @@ Needed features with priorities.
 2 Fractal paper generator
 2 Brush tip display
 2 Brush compositing tools
+1 Custom GTK theme
 1 GPU speedup
 
