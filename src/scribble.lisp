@@ -81,10 +81,10 @@
 	  (widget-show w))))))
 
 (defun scribble-xinput ()
-  (let (pixmap input-d)
+  (let (pixmap input-d brush-stroke)
     (labels ((realize (widget)
 	       (iter (for i in '(:pointer-motion-mask :pointer-motion-hint-mask
-				 :leave-notify-mask :button-press-mask))
+				 :leave-notify-mask :button-press-mask :button-release-mask))
 		     (pushnew i (gdk-window-events (widget-window widget)))))
 	     (configure-event (widget event)
 	       (declare (ignore event))
@@ -129,9 +129,36 @@
 	     (button-press-event (widget event)
 	       (when (and pixmap
 			  (= (event-button-button event) 1))
-		 (draw-brush widget (gdk-device-source (event-button-device event))
+		 (let ((pressure (event-get-axis event :pressure))
+		       (source (gdk-device-source (event-button-device event))))
+		   (setf brush-stroke (make-instance 'brush-stroke :pressure (if (eq :mouse source)
+										 (clamp (or pressure 1) 0 1)
+										 (clamp (or pressure 0) 0 1))
+						     :x (event-button-x event) :y (event-button-y event)
+						     :brush :simple-round
+						     :color (flet ((greyscale-color (x)
+								     (make-color :red x :green x :blue x)))
+							      (greyscale-color
+							       (ecase source
+								 (:mouse 15000)
+								 (:pen 0)
+								 (:eraser 65535)
+								 (:cursor 45000))))
+						     :spacing 25 :pixmap pixmap :widget widget)))
+		   
+#+nil
+		 (setf stroke-fun (move-brush-lambda (event-button-x event) (event-button-y event)
+						     pixmap #'(lambda (pixmap x y pressure l)
+								(declare (ignore pixmap l))
+								(draw-brush widget (gdk-device-source (event-button-device event))
+									    x y pressure))
+						     (event-get-axis event :pressure)
+						     (gdk-device-source (event-button-device event)) 25))
+#+nil		 (draw-brush widget (gdk-device-source (event-button-device event))
 			     (event-button-x event) (event-button-y event)
 			     (event-get-axis event :pressure))))
+	     (button-release-event (widget event)
+	       (setf brush-stroke nil))
 	     (motion-notify-event (widget event)
 	       (let ((device (event-motion-device event))
 		     x y pressure state)
@@ -148,8 +175,14 @@
 			     state state1)))
 		 (if (and pixmap
 			  (member :button1-mask state))
-		     (draw-brush widget (gdk-device-source device)
-				 x y pressure))))
+		     (when brush-stroke
+		       (add-point-to-stroke brush-stroke x y (if (eq :mouse (gdk-device-source device))
+								 (clamp (or pressure 1) 0 1)
+								 (clamp (or pressure 0) 0 1)))
+		       (draw-stroke brush-stroke)
+#+nil		       (funcall stroke-fun x y pressure)
+#+nil		     (draw-brush widget (gdk-device-source device)
+				 x y pressure)))))
 	     (create-input-dialog ()
 	       (unless input-d
 		 (setf input-d (make-instance 'input-dialog))
@@ -191,6 +224,7 @@
 					  (declare (ignore w))
 					  (leave-gtk-main)))
 	  (connect-signal da "button_press_event" #'button-press-event)
+	  (connect-signal da "button_release_event" #'button-release-event)
 	  (connect-signal da "motion_notify_event" #'motion-notify-event)
 	  (connect-signal da "realize" #'realize)
 	  (setf (widget-extension-events da) :cursor)

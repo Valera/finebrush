@@ -14,4 +14,5 @@
 			:serial t
 			:components ((:file "packages")
 				     (:file "curve-widget")
+				     (:file "brush-stroke")
 				     (:file "scribble")))))
