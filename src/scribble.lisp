@@ -135,7 +135,7 @@
 										 (clamp (or pressure 1) 0 1)
 										 (clamp (or pressure 0) 0 1))
 						     :x (event-button-x event) :y (event-button-y event)
-						     :brush :simple-round
+						     :brush :cairo-round
 						     :color (flet ((greyscale-color (x)
 								     (make-color :red x :green x :blue x)))
 							      (greyscale-color
