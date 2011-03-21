@@ -43,17 +43,17 @@
 		(when (= dub-index 1) ;; Do not double first dub, it is already placed at button press event.
 		  (incf l spacing)
 		  (next-iteration))
-		(with interp-param = (/ (- l l0) len))
+		(for interp-param = (/ (- l l0) len))
 		(bind:bind (((x y w h) (draw-brush brush pixmap (interp x0 x1 interp-param)
 						   (interp y0 y1 interp-param) (interp pressure0 pressure1 interp-param)
 						   :color color :stroke-length l)))
 		  (widget-queue-draw-area widget x y w h))
-		(print (list 'data y0 y1 len l l0) *debug*)
-		(print (list 'hypot (hypot (- (+ x0 (* (/ (- x1 x0) len) (- l l0))) (first *prev*))
-					   (- (+ y0 (* (/ (- y1 y0) len) (- l l0))) (second *prev*))))
-		       *debug*)
-		(setf *prev* (list (+ x0 (* (/ (- x1 x0) len) (- l l0)))
-				   (+ y0 (* (/ (- y1 y0) len) (- l l0)))))
+;		(print (list 'data y0 y1 len l l0) *debug*)
+;		(print (list 'hypot (hypot (- (+ x0 (* (/ (- x1 x0) len) (- l l0))) (first *prev*))
+;					   (- (+ y0 (* (/ (- y1 y0) len) (- l l0))) (second *prev*))))
+;		       *debug*)
+;		(setf *prev* (list (+ x0 (* (/ (- x1 x0) len) (- l l0)))
+;				   (+ y0 (* (/ (- y1 y0) len) (- l l0)))))
 #|
 		(print (list 'now (+ x0 (* (/ (- x1 x0) len) (- l l0)))  (+ y0 (* (/ (- y1 y0) len) (- l l0)))) *debug*)
 		(print (list 'bef *prev*) *debug*)
@@ -61,7 +61,7 @@
 		
 		
 |#		
-		  (incf l spacing))
+		(incf l spacing))
 	    (incf l0 len))
       (setf (cdr point-list) nil)
 ;      (print (list 'a (- l l0)) *debug*)
