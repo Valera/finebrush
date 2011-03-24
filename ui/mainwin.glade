@@ -5,6 +5,7 @@
   <object class="GtkWindow" id="window1">
     <property name="width_request">800</property>
     <property name="height_request">800</property>
+    <property name="title" translatable="yes">FineBrush</property>
     <property name="default_width">800</property>
     <property name="default_height">800</property>
     <child>
@@ -62,6 +63,7 @@
                       <object class="GtkImageMenuItem" id="imagemenuitem5">
                         <property name="visible">True</property>
                         <property name="related_action">quit</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -150,10 +152,16 @@
           <object class="GtkHBox" id="hbox1">
             <property name="visible">True</property>
             <child>
-              <object class="GtkDrawingArea" id="drawingarea1">
-                <property name="width_request">100</property>
-                <property name="height_request">200</property>
+              <object class="GtkScrolledWindow" id="scrolledwindow1">
                 <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="hscrollbar_policy">automatic</property>
+                <property name="vscrollbar_policy">automatic</property>
+                <child>
+                  <object class="GtkDrawingArea" id="drawingarea1">
+                    <property name="visible">True</property>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="position">0</property>
@@ -163,16 +171,7 @@
               <object class="GtkVBox" id="vbox2">
                 <property name="visible">True</property>
                 <child>
-                  <object class="GtkColorSelection" id="colorselection2">
-                    <property name="visible">True</property>
-                    <property name="has_opacity_control">True</property>
-                    <property name="current_color">#000000000000</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">0</property>
-                  </packing>
+                  <placeholder/>
                 </child>
                 <child>
                   <placeholder/>
