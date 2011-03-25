@@ -47,7 +47,7 @@ it is bound to this context"
 	(fill-path)
 	(list (- x r) (- y r) (* 2 r) (* 2 r))))))
 
-(defmethod draw-brush ((brush (eql :cairo-round-soft)) pixmap x y pressure &key color)
+(defmethod draw-brush ((brush (eql :cairo-round-soft)) pixmap x y pressure &key color alpha)
   (with-gdk-context (ctx pixmap)
     (with-context (ctx)
       (let* ((rad (* 10 pressure))
@@ -56,7 +56,7 @@ it is bound to this context"
 	     (b (/ (color-blue color) 65535d0)))
 	(with-radial-pattern gradient
 	    (x y (* 0.5 rad) x y (* rad))
-	    `((0 (,r ,g ,b 1))
+	    `((0 (,r ,g ,b ,alpha))
 	      (1 (,r ,g ,b 0)))
 	  (arc x y rad 0 (* 2 pi))
 	  (set-source gradient)

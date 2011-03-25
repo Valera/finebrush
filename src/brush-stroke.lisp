@@ -9,15 +9,16 @@
    (pixmap :initarg :pixmap)
    (spacing :initarg :spacing)
    (color :initarg :color)
+   (alpha :initarg :alpha)
    (brush :initarg :brush)))
 
 (defmethod initialize-instance :after ((instance brush-stroke) &rest initargs &key x y pressure &allow-other-keys)
   (declare (ignore initargs))
   (setf *prev* (list x y))
-  (with-slots (point-list brush pixmap widget color)
+  (with-slots (point-list brush pixmap widget color alpha)
       instance
     (push (list x y pressure) point-list)
-    (bind:bind (((x y w h) (draw-brush brush pixmap x y pressure :color color)))
+    (bind:bind (((x y w h) (draw-brush brush pixmap x y pressure :color color :alpha alpha)))
       (widget-queue-draw-area widget x y w h))))
 
 (defun add-point-to-stroke (brush-stroke x y pressure)
@@ -32,7 +33,7 @@
   (+ x0 (* (- x1 x0) param)))
 
 (defun draw-stroke (brush-stroke)
-  (with-slots (point-list brush pixmap widget color dub-index l l0 spacing)
+  (with-slots (point-list brush pixmap widget color alpha dub-index l l0 spacing)
       brush-stroke
     (iter (for i from 0 below (1- (length point-list)))
 	  (for (x1 y1 pressure1) = (nth i point-list))
@@ -44,9 +45,10 @@
 		  (incf l spacing)
 		  (next-iteration))
 		(for interp-param = (/ (- l l0) len))
+		(print (list 'alp alpha) *debug*)
 		(bind:bind (((x y w h) (draw-brush brush pixmap (interp x0 x1 interp-param)
 						   (interp y0 y1 interp-param) (interp pressure0 pressure1 interp-param)
-						   :color color :stroke-length l)))
+						   :color color :alpha alpha :stroke-length l)))
 		  (widget-queue-draw-area widget x y w h))
 ;		(print (list 'data y0 y1 len l l0) *debug*)
 ;		(print (list 'hypot (hypot (- (+ x0 (* (/ (- x1 x0) len) (- l l0))) (first *prev*))

@@ -15,6 +15,8 @@
 	brush-stroke
 	hsv
 	viewport
+	spacing-adjustment
+	alpha-adjustment
 	(builder (let ((builder (make-instance 'builder)))
 		   (builder-add-from-file builder (namestring (merge-pathnames "ui/mainwin.glade" *src-location*)))
 		   builder)))
@@ -91,7 +93,9 @@
 								 (:pen 0)
 								 (:eraser 65535)
 								 (:cursor 45000))))
-						     :spacing 2 :pixmap pixmap :widget widget)))))
+						     :spacing (adjustment-value spacing-adjustment)
+						     :alpha (print (adjustment-value alpha-adjustment) *debug*)
+						     :pixmap pixmap :widget widget)))))
 	     (button-release-event (widget event)
 	       (setf brush-stroke nil))
 	     (motion-notify-event (widget event)
@@ -132,6 +136,9 @@
 	      (v-box-2 (bgo "vbox2"))
 	      (h-s-v (make-instance 'h-s-v))
 	      (new-painting-dialog (bgo "new-painting-dialog")))
+	  (setf spacing-adjustment (bgo "spacing-adjustment"))
+	  (setf (adjustment-value spacing-adjustment) 2d0)
+	  (setf alpha-adjustment (bgo "brush-alpha-adjustment"))
 	  (setf viewport (bgo "viewport1"))
 	  (print (adjustment-lower (viewport-vadjustment viewport)) *debug*)
 	  (setf (adjustment-lower (viewport-vadjustment viewport)) -50d0)
