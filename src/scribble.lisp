@@ -2,11 +2,19 @@
 
 (defparameter *src-location* (asdf:component-pathname (asdf:find-system :finebrush)))
 
+(cffi:defcfun gtk_rc_parse :void
+  (filename (:pointer)))
+
+(defun rc-parse (name)
+  (cffi:with-foreign-string (foreign-name name)
+    (gtk_rc_parse foreign-name)))
+
 (defun scribble-xinput ()
-   (let (pixmap
+  (let (pixmap
 	input-d
 	brush-stroke
-	color-selection
+	hsv
+	viewport
 	(builder (let ((builder (make-instance 'builder)))
 		   (builder-add-from-file builder (namestring (merge-pathnames "ui/mainwin.glade" *src-location*)))
 		   builder)))
@@ -26,6 +34,9 @@
 		   (gdk::draw-rectangle pixmap gc t 0 0 w h))
 		 t))
 	     (expose-event (widget event)
+	       (setf (widget-width-request widget) 1000)
+	       (setf (widget-height-request widget) 1000)
+	       (setf (adjustment-lower (viewport-vadjustment viewport)) -50d0)
 	       (let* ((rect (event-expose-area event))
 		      (window (widget-window widget))
 		      (gc (graphics-context-new window)))
@@ -65,7 +76,13 @@
 										 (clamp (or pressure 0) 0 1))
 						     :x (event-button-x event) :y (event-button-y event)
 						     :brush :cairo-round-soft
-						     :color (color-selection-current-color color-selection)
+						     :color (bind:bind (((:values h s v) (h-s-v-get-color hsv))
+									((:values r g b) (h-s-v-to-r-g-b h s v))
+									(r1 (* 65535 r))
+									(g1 (* 65535 g))
+									(b1 (* 65535 b)))
+							      (print (list r g b) *debug*)
+							      (make-color :red r1 :green g1 :blue b1))
 						     #+ nil (flet ((greyscale-color (x)
 								     (make-color :red x :green x :blue x)))
 							      (greyscale-color
@@ -107,17 +124,35 @@
 				     (object-destroy object)))
 		 (widget-show input-d))))
       (within-main-loop
+;	(rc-parse "/usr/share/themes/Equinox Glass/gtk-2.0/gtkrc")
+;	(rc-parse "/usr/share/themes/Redmond/gtk-2.0/gtkrc")
 	(let ((w (bgo "window1"))
 	      (da (bgo "drawingarea1" ))
-	      (input-dialog-button (bgo "button1")))
-	  (setf color-selection (bgo "colorselection2"))
+	      (input-dialog-button (bgo "button1"))
+	      (v-box-2 (bgo "vbox2"))
+	      (h-s-v (make-instance 'h-s-v))
+	      (new-painting-dialog (bgo "new-painting-dialog")))
+	  (setf viewport (bgo "viewport1"))
+	  (print (adjustment-lower (viewport-vadjustment viewport)) *debug*)
+	  (setf (adjustment-lower (viewport-vadjustment viewport)) -50d0)
+	  (box-pack-start v-box-2 h-s-v :expand nil :fill nil)
+	  (setf hsv h-s-v)
+	  (setf (widget-width-request h-s-v) 200)
+	  (setf (widget-height-request h-s-v) 200)
+	  (h-s-v-set-metrics h-s-v 180 20)
+#+nil	  (print (container-children (first (container-children (first (container-children color-selection))))) *debug*)
 	  (iter (for device in (remove-if-not (lambda (x)
 						(member (gdk-device-source x) '(:cursor :pen :eraser)))
 					      (gdk-devices-list)))
 		(setf (gdk-device-mode device) :screen))
 	  (connect-signal da "configure-event" #'configure-event)
 	  (connect-signal da "expose-event" #'expose-event)
-	  (connect-signal (bgo "quit") "activate" #'(lambda (action)
+	  (connect-signal (bgo "new-painting-action") "activate" #'(lambda (action)
+								     (declare (ignore action))
+								     (widget-show new-painting-dialog)
+								     (print (dialog-run new-painting-dialog) *debug*)
+								     (widget-hide new-painting-dialog)))
+	  (connect-signal (bgo "quit-action") "activate" #'(lambda (action)
 						      (declare (ignore action))
 						      (object-destroy w)))
 	  (connect-signal w "destroy" #'(lambda (w)
