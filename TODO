@@ -9,9 +9,10 @@ Needed features with priorities.
 + 9 Color Picker
 9 Painting dragging and scaling
 9 Brush selector
-8 Brush preferences.
++- 8 Brush preferences.
 8 Unified brush engine
 7 Undo/Redo
+7 Fullscreen mode
 6 Layer engine
 6 Hairy Brush
 6 Composition tools & perspective grids.
