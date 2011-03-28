@@ -35,6 +35,7 @@
                       <object class="GtkImageMenuItem" id="imagemenuitem2">
                         <property name="label">gtk-open</property>
                         <property name="visible">True</property>
+                        <property name="related_action">save-action</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
@@ -124,6 +125,26 @@
               </object>
             </child>
             <child>
+              <object class="GtkMenuItem" id="options-menuitem">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">_&#x41D;&#x430;&#x441;&#x442;&#x440;&#x43E;&#x439;&#x43A;&#x438;</property>
+                <property name="use_underline">True</property>
+                <child type="submenu">
+                  <object class="GtkMenu" id="menu4">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkImageMenuItem" id="options">
+                        <property name="visible">True</property>
+                        <property name="related_action">options-action</property>
+                        <property name="use_action_appearance">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
               <object class="GtkMenuItem" id="menuitem4">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">_&#x421;&#x43F;&#x440;&#x430;&#x432;&#x43A;&#x430;</property>
@@ -170,8 +191,9 @@
             <child>
               <object class="GtkToolButton" id="toolbutton-open">
                 <property name="visible">True</property>
+                <property name="use_action_appearance">True</property>
+                <property name="related_action">open-action</property>
                 <property name="label" translatable="yes">open</property>
-                <property name="stock_id">gtk-open</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -181,9 +203,10 @@
             <child>
               <object class="GtkToolButton" id="toolbutton1">
                 <property name="visible">True</property>
+                <property name="use_action_appearance">True</property>
+                <property name="related_action">save-action</property>
                 <property name="label" translatable="yes">save</property>
                 <property name="use_underline">True</property>
-                <property name="stock_id">gtk-save</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -545,5 +568,14 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
     <property name="page_size">10</property>
+  </object>
+  <object class="GtkAction" id="save-action">
+    <property name="stock_id">gtk-save</property>
+  </object>
+  <object class="GtkAction" id="open-action">
+    <property name="stock_id">gtk-open</property>
+  </object>
+  <object class="GtkAction" id="options-action">
+    <property name="stock_id">gtk-preferences</property>
   </object>
 </interface>

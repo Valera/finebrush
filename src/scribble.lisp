@@ -11,6 +11,9 @@
 
 ;; FIXME: cleanup
 
+(defparameter *canvas-margin* 400
+  "Margin around painting in GtkFixed.")
+
 (defun scribble-xinput ()
   (let (pixmap
 	input-d
@@ -20,7 +23,10 @@
 	spacing-adjustment
 	alpha-adjustment
 	fullscreen-p
-	brush 
+	brush
+	da0
+	fixed
+	(renew-pixmap-p t)
 	(builder (let ((builder (make-instance 'builder)))
 		   (builder-add-from-file builder (namestring (merge-pathnames "ui/mainwin.glade" *src-location*)))
 		   builder)))
@@ -31,14 +37,16 @@
 		     (pushnew i (gdk-window-events (widget-window widget)))))
 	     (configure-event (widget event)
 	       (declare (ignore event))
-	       (let* ((window (widget-window widget))
-		      (gc (graphics-context-new window)))
-		 (multiple-value-bind (w h) (gdk:drawable-get-size (widget-window widget))
-		   (print (list 'conf w h) *debug*)
-		   (setf pixmap (pixmap-new window w h -1))
-		   (setf (graphics-context-rgb-fg-color gc)
-			 (make-color :red 65535 :green 65535 :blue 65535))
-		   (gdk::draw-rectangle pixmap gc t 0 0 w h))
+	       (when renew-pixmap-p
+		 (setf renew-pixmap-p nil)
+		 (let* ((window (widget-window widget))
+			(gc (graphics-context-new window)))
+		   (multiple-value-bind (w h) (gdk:drawable-get-size (widget-window widget))
+		     (print (list 'conf w h) *debug*)
+		     (setf pixmap (pixmap-new window w h -1))
+		     (setf (graphics-context-rgb-fg-color gc)
+			   (make-color :red 65535 :green 65535 :blue 65535))
+		     (gdk::draw-rectangle pixmap gc t 0 0 w h)))
 		 t))
 	     (expose-event (widget event)
 	       (let* ((window (widget-window widget))
@@ -85,6 +93,7 @@
 						     :alpha (print (adjustment-value alpha-adjustment) *debug*)
 						     :pixmap pixmap :widget widget)))))
 	     (button-release-event (widget event)
+	       (declare (ignore widget event))
 	       (setf brush-stroke nil))
 	     (motion-notify-event (widget event)
 	       (let ((device (event-motion-device event))
@@ -127,6 +136,36 @@
 	       (setf (combo-box-model c) m)
 	       (setf brush (first *brush-types*)
 		     (combo-box-active c) 0))
+	     (file-save (a)
+	       (declare (ignore a))
+	       (let ((d (make-instance 'file-chooser-dialog :action :save :title "Choose file to save")))
+		 (dialog-add-button d "gtk-save" :accept)
+		 (dialog-add-button d "gtk-cancel" :cancel)
+		 (when (eq (dialog-run d) :accept)
+		   (pixbuf-save (pixbuf-get-from-drawable nil pixmap) (file-chooser-filename d) "png")
+		   (format *debug* "saved to file ~A~%" (file-chooser-filename d)))
+		 (object-destroy d)))
+	     (file-load (a)
+	       (declare (ignore a))
+	       (let ((d (make-instance 'file-chooser-dialog :action :open :title "Choose file to open")))
+		 (dialog-add-button d "gtk-open" :accept)
+		 (dialog-add-button d "gtk-cancel" :cancel)
+		 (when (eq (dialog-run d) :accept)
+		   (let* ((gc (graphics-context-new pixmap))
+			  (pixbuf (pixbuf-new-from-file (file-chooser-filename d)))
+			  (w (pixbuf-width pixbuf))
+			  (h (pixbuf-height pixbuf)))
+		     (setf (widget-width-request da0) w
+			   (widget-height-request da0) h)
+		     (setf (widget-width-request fixed) (+ w (* 2 *canvas-margin*))
+			   (widget-height-request fixed) (+ h (* 2 *canvas-margin*)))
+		     (setf (fixed-child-x fixed da0) *canvas-margin*
+			   (fixed-child-y fixed da0) *canvas-margin*)
+		     (setf pixmap (pixmap-new pixmap w h -1))
+		     (draw-pixbuf pixmap gc pixbuf
+				  0 0 0 0 -1 -1 :none 0 0)
+		     (format *debug* "saved to file ~A~%" (file-chooser-filename d))))
+		 (object-destroy d)))
 	     (create-input-dialog ()
 	       (unless input-d
 		 (setf input-d (make-instance 'input-dialog))
@@ -141,12 +180,13 @@
 	(let ((w (bgo "window1"))
 	      (da (bgo "drawingarea1" ))
 	      (sw (bgo "scrolledwindow1"))
-	      (input-dialog-button (bgo "button1"))
 	      (v-box-2 (bgo "vbox2"))
 	      (brush-combo (bgo "brush-combo-box"))
 	      (brush-combo-model (make-instance 'array-list-store))
 	      (h-s-v (make-instance 'h-s-v))
 	      (new-painting-dialog (bgo "new-painting-dialog")))
+	  (setf da0 da)
+	  (setf fixed (bgo "fixed1"))
 	  (initialize-model-and-combo-box brush-combo-model brush-combo)
 	  (connect-signal brush-combo "changed" #'(lambda (arg) (declare (ignore arg))
 							  (setf brush (nth (combo-box-active brush-combo) *brush-types*))))
@@ -181,6 +221,9 @@
 								     (widget-show new-painting-dialog)
 								     (print (dialog-run new-painting-dialog) *debug*)
 								     (widget-hide new-painting-dialog)))
+	  (connect-signal (bgo "save-action") "activate" #'file-save)
+	  (connect-signal (bgo "open-action") "activate" #'file-load)
+	  (connect-signal (bgo "options-action") "activate" #'(lambda (a) (declare (ignore a)) (create-input-dialog)))
 	  (connect-signal (bgo "quit-action") "activate" #'(lambda (action)
 						      (declare (ignore action))
 						      (object-destroy w)))
