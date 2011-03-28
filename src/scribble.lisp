@@ -19,6 +19,7 @@
 	viewport
 	spacing-adjustment
 	alpha-adjustment
+	fullscreen-p
 	(builder (let ((builder (make-instance 'builder)))
 		   (builder-add-from-file builder (namestring (merge-pathnames "ui/mainwin.glade" *src-location*)))
 		   builder)))
@@ -133,6 +134,16 @@
 								 (clamp (or pressure 1) 0 1)
 								 (clamp (or pressure 0) 0 1)))
 		       (draw-stroke brush-stroke)))))
+	     (key-press-event (window event)
+	       (if (eql (event-key-keyval event) 65480)
+		   (if fullscreen-p
+		       (progn
+			 (gtk-window-unfullscreen window)
+			 (setf fullscreen-p nil))
+		       (progn
+			 (gtk-window-fullscreen window)
+			 (setf fullscreen-p t))))
+	       (print event *debug*))
 	     (create-input-dialog ()
 	       (unless input-d
 		 (setf input-d (make-instance 'input-dialog))
@@ -198,6 +209,7 @@
 	  (connect-signal da "button_press_event" #'button-press-event)
 	  (connect-signal da "button_release_event" #'button-release-event)
 	  (connect-signal da "motion_notify_event" #'motion-notify-event)
+	  (connect-signal w "key-press-event" #'key-press-event)
 	  (connect-signal da "realize" #'realize)
 	  (setf (widget-extension-events da) :cursor)
 	  (widget-show da)
