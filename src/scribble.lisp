@@ -134,7 +134,6 @@
 	      (v-box-2 (bgo "vbox2"))
 	      (h-s-v (make-instance 'h-s-v))
 	      (new-painting-dialog (bgo "new-painting-dialog")))
-	  (setf sw0 sw)
 	  (widget-modify-bg (bgo "viewport1") :normal (make-color :red 30000 :green 30000 :blue 30000))
 	  (setf spacing-adjustment (bgo "spacing-adjustment"))
 	  (setf (adjustment-value spacing-adjustment) 2d0)
