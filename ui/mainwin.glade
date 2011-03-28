@@ -157,8 +157,8 @@
             <child>
               <object class="GtkToolButton" id="toolbutton-new">
                 <property name="visible">True</property>
-                <property name="related_action">new-painting-action</property>
                 <property name="use_action_appearance">True</property>
+                <property name="related_action">new-painting-action</property>
                 <property name="label" translatable="yes">new</property>
                 <property name="use_underline">True</property>
               </object>
@@ -294,7 +294,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkComboBox" id="combobox1">
+                      <object class="GtkComboBox" id="brush-combo-box">
                         <property name="visible">True</property>
                       </object>
                       <packing>

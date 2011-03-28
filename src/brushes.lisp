@@ -1,5 +1,10 @@
 (in-package :finebrush)
 
+(defun brush-name (brush-type)
+  (substitute #\Space #\- (string-capitalize (string-downcase (string brush-type)) :end 1)))
+
+(defparameter *brush-types* '(:cairo-round-hard :cairo-round-soft))
+
 (defmacro with-gdk-cairo-context ((width height &optional context) gdk-drawable &body body)
   "Wraps 'body' with cairo context from gdk-drawable. If '&optional context' present,
 it is bound to this context"
@@ -63,5 +68,3 @@ it is bound to this context"
 	  (fill-path)
 	  (list (floor (- x rad)) (floor (- y rad))
 		(ceiling (* 2 rad)) (ceiling (* 2 rad))))))))
-
-	

@@ -20,6 +20,7 @@
 	spacing-adjustment
 	alpha-adjustment
 	fullscreen-p
+	brush 
 	(builder (let ((builder (make-instance 'builder)))
 		   (builder-add-from-file builder (namestring (merge-pathnames "ui/mainwin.glade" *src-location*)))
 		   builder)))
@@ -64,7 +65,7 @@
 										 (clamp (or pressure 1) 0 1)
 										 (clamp (or pressure 0) 0 1))
 						     :x (event-button-x event) :y (event-button-y event)
-						     :brush :cairo-round-soft
+						     :brush brush
 						     :color (bind:bind (((:values h s v) (h-s-v-get-color hsv))
 									((:values r g b) (h-s-v-to-r-g-b h s v))
 									(r1 (* 65535 r))
@@ -116,6 +117,16 @@
 			 (gtk-window-fullscreen window)
 			 (setf fullscreen-p t))))
 	       (print event *debug*))
+	     (initialize-model-and-combo-box (m c)
+	       (store-add-column m "gchararray" #'identity)
+	       (iter (for i in *brush-types*)
+		     (store-add-item m (brush-name i)))
+	       (let ((renderer (make-instance 'cell-renderer-text :text "A text")))
+		 (cell-layout-pack-start c renderer :expand t)
+		 (cell-layout-add-attribute c renderer "text" 0))
+	       (setf (combo-box-model c) m)
+	       (setf brush (first *brush-types*)
+		     (combo-box-active c) 0))
 	     (create-input-dialog ()
 	       (unless input-d
 		 (setf input-d (make-instance 'input-dialog))
@@ -132,8 +143,13 @@
 	      (sw (bgo "scrolledwindow1"))
 	      (input-dialog-button (bgo "button1"))
 	      (v-box-2 (bgo "vbox2"))
+	      (brush-combo (bgo "brush-combo-box"))
+	      (brush-combo-model (make-instance 'array-list-store))
 	      (h-s-v (make-instance 'h-s-v))
 	      (new-painting-dialog (bgo "new-painting-dialog")))
+	  (initialize-model-and-combo-box brush-combo-model brush-combo)
+	  (connect-signal brush-combo "changed" #'(lambda (arg) (declare (ignore arg))
+							  (setf brush (nth (combo-box-active brush-combo) *brush-types*))))
 	  (widget-modify-bg (bgo "viewport1") :normal (make-color :red 30000 :green 30000 :blue 30000))
 	  (setf spacing-adjustment (bgo "spacing-adjustment"))
 	  (setf (adjustment-value spacing-adjustment) 2d0)
