@@ -135,8 +135,9 @@
                     <child>
                       <object class="GtkImageMenuItem" id="options">
                         <property name="visible">True</property>
-                        <property name="related_action">options-action</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="related_action">options-action</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -178,8 +179,8 @@
             <child>
               <object class="GtkToolButton" id="toolbutton-new">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">new-painting-action</property>
+                <property name="use_action_appearance">True</property>
                 <property name="label" translatable="yes">new</property>
                 <property name="use_underline">True</property>
               </object>
@@ -191,8 +192,8 @@
             <child>
               <object class="GtkToolButton" id="toolbutton-open">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">open-action</property>
+                <property name="use_action_appearance">True</property>
                 <property name="label" translatable="yes">open</property>
               </object>
               <packing>
@@ -201,10 +202,10 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="toolbutton1">
+              <object class="GtkToolButton" id="toolbutton-save">
                 <property name="visible">True</property>
-                <property name="use_action_appearance">True</property>
                 <property name="related_action">save-action</property>
+                <property name="use_action_appearance">True</property>
                 <property name="label" translatable="yes">save</property>
                 <property name="use_underline">True</property>
               </object>
@@ -214,11 +215,12 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="toolbutton-zoon-in">
+              <object class="GtkToolButton" id="toolbutton-zoom-in">
                 <property name="visible">True</property>
+                <property name="related_action">zoom-in-action</property>
+                <property name="use_action_appearance">True</property>
                 <property name="label" translatable="yes">zoom in</property>
                 <property name="use_underline">True</property>
-                <property name="stock_id">gtk-zoom-in</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -228,9 +230,10 @@
             <child>
               <object class="GtkToolButton" id="toolbutton-zoom-out">
                 <property name="visible">True</property>
+                <property name="related_action">zoom-out-action</property>
+                <property name="use_action_appearance">True</property>
                 <property name="label" translatable="yes">zoom out</property>
                 <property name="use_underline">True</property>
-                <property name="stock_id">gtk-zoom-out</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -577,5 +580,11 @@
   </object>
   <object class="GtkAction" id="options-action">
     <property name="stock_id">gtk-preferences</property>
+  </object>
+  <object class="GtkAction" id="zoom-in-action">
+    <property name="stock_id">gtk-zoom-in</property>
+  </object>
+  <object class="GtkAction" id="zoom-out-action">
+    <property name="stock_id">gtk-zoom-out</property>
   </object>
 </interface>

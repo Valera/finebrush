@@ -7,7 +7,7 @@ Needed features with priorities.
 +  10 Save/Load
 +- 10 New Painting Dialog
 +  9 Color Picker
-   9 Painting dragging and scaling
++- 9 Painting dragging and scaling
 +  9 Brush selector
 +- 8 Brush preferences.
    8 Unified brush engine
@@ -17,9 +17,10 @@ Needed features with priorities.
    6 Hairy Brush
    6 Composition tools & perspective grids.
    6 Blur / Smudge / Dodge / Burn
-   5 Brush applying modes (normal, hard/solt ligth, overlay etc)
+   5 Brush applying modes (normal, hard/solt light, overlay etc)
    5 Autosaving
    4 Color Mixer
+   3 BrushID
    2 Fractal paper generator
    2 Brush tip display
    2 Brush compositing tools
