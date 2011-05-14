@@ -33,8 +33,9 @@
   (+ x0 (* (- x1 x0) param)))
 
 (defun draw-stroke (brush-stroke)
-  (with-slots (point-list brush pixmap widget color alpha dub-index l l0 spacing)
-      brush-stroke
+  (bind (((:slots point-list brush pixmap widget color alpha dub-index l l0 spacing)
+	  brush-stroke)
+	 (redraw-rects))
     (iter (for i from 0 below (1- (length point-list)))
 	  (for (x1 y1 pressure1) = (nth i point-list))
 	  (for (x0 y0 pressure0) = (nth (1+ i) point-list))
@@ -49,7 +50,8 @@
 		(bind:bind (((x y w h) (draw-brush brush pixmap (interp x0 x1 interp-param)
 						   (interp y0 y1 interp-param) (interp pressure0 pressure1 interp-param)
 						   :color color :alpha alpha :stroke-length l)))
-		  (widget-queue-draw-area widget x y w h))
+		  (push (list x y w h) redraw-rects))
+;		  (widget-queue-draw-area widget x y w h))
 ;		(print (list 'data y0 y1 len l l0) *debug*)
 ;		(print (list 'hypot (hypot (- (+ x0 (* (/ (- x1 x0) len) (- l l0))) (first *prev*))
 ;					   (- (+ y0 (* (/ (- y1 y0) len) (- l l0))) (second *prev*))))
@@ -68,6 +70,8 @@
       (setf (cdr point-list) nil)
 ;      (print (list 'a (- l l0)) *debug*)
 ;      (print points *debug*)
+      (print (list 'rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr redraw-rects) *debug*)
+      (print redraw-rects *debug*)
 ))
 
 (defvar *prev* 0)

@@ -16,4 +16,5 @@
 				     (:file "curve-widget")
 				     (:file "brushes")
 				     (:file "brush-stroke")
+				     (:file "canvas")
 				     (:file "scribble")))))

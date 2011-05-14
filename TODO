@@ -7,14 +7,14 @@ Needed features with priorities.
 +  10 Save/Load
 +- 10 New Painting Dialog
 +  9 Color Picker
-+- 9 Painting dragging and scaling
++  9 Painting dragging and scaling
 +  9 Brush selector
-+- 8 Brush preferences.
+-  8 Brush preferences.
+   8 Hairy Brush
    8 Unified brush engine
    7 Undo/Redo
 +  7 Fullscreen mode
    6 Layer engine
-   6 Hairy Brush
    6 Composition tools & perspective grids.
    6 Blur / Smudge / Dodge / Burn
    5 Brush applying modes (normal, hard/solt light, overlay etc)
