@@ -96,10 +96,13 @@
 	       (h-s-v (make-instance 'h-s-v))
 	       (new-painting-dialog (bgo "new-painting-dialog"))
 	       (viewport (bgo "viewport1"))
+	       (adjustment-painting-width (bgo "adjustment-painting-width"))
+	       (adjustment-painting-height (bgo "adjustment-painting-height"))
+	       (color-button (bgo "colorbutton1"))
 	       (canvas (make-instance 'canvas :width 400 :height 400 :display-widget da :fixed-widget (bgo "fixed1")
 				      :hadjustment (viewport-hadjustment viewport) 
 				      :vadjustment (viewport-vadjustment viewport) :scrolled-window sw
-				      :fg-color (make-color :green 65535) :brush :cairo-round-hard
+				      :fg-color (hsv-get-gtk-color h-s-v) :brush :cairo-round-hard
 				      :bg-color (make-color :red 65535 :green 65535 :blue 65535))))
 	  (setf da0 da)
 	  (setf fixed (bgo "fixed1"))
@@ -123,11 +126,22 @@
 						(member (gdk-device-source x) '(:cursor :pen :eraser)))
 					      (gdk-devices-list)))
 		(setf (gdk-device-mode device) :screen))
-	  (connect-signal (bgo "new-painting-action") "activate" #'(lambda (action)
-								     (declare (ignore action))
-								     (widget-show new-painting-dialog)
-								     (print (dialog-run new-painting-dialog) *debug*)
-								     (widget-hide new-painting-dialog)))
+	  (connect-signal (bgo "new-painting-action") "activate" 
+			  (lambda (action)
+			    (declare (ignore action))
+			    (widget-show new-painting-dialog)
+			    (when (eq (dialog-run new-painting-dialog) :ok)
+			      (when canvas
+				(disconnect-signals canvas))
+			      (setf canvas
+				    (make-instance 'canvas :width (ceiling (adjustment-value adjustment-painting-width))
+						   :height (ceiling (adjustment-value adjustment-painting-height))
+						   :display-widget da :fixed-widget (bgo "fixed1")
+						   :hadjustment (viewport-hadjustment viewport) 
+						   :vadjustment (viewport-vadjustment viewport) :scrolled-window sw
+						   :fg-color (hsv-get-gtk-color hsv) :brush :cairo-round-hard
+						   :bg-color (color-button-color color-button))))
+			    (widget-hide new-painting-dialog)))
 	  (connect-signal (bgo "open-action") "activate"
 			  (lambda (a) (declare (ignore a))
 				  (when-let (fname (file-load-name))
